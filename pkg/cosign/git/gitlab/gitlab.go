@@ -70,9 +70,21 @@ func (g *Gl) PutSecret(ctx context.Context, ref string, pf cosign.PassFunc) erro
 		Masked:           gitlab.Bool(false),
 		EnvironmentScope: gitlab.String("*"),
 	})
+	fmt.Println("Project Variable COSIGN_PASSWORD")
 	if err != nil {
-		ui.Warnf(ctx, "If you are using a self-hosted gitlab please set the \"GITLAB_HOST\" your server name.")
-		return fmt.Errorf("could not create \"COSIGN_PASSWORD\" variable: %w", err)
+		_, passwordResp, err = client.GroupVariables.CreateVariable(ref, &gitlab.CreateGroupVariableOptions{
+			Key:              gitlab.String("COSIGN_PASSWORD"),
+			Value:            gitlab.String(string(keys.Password())),
+			VariableType:     gitlab.VariableType(gitlab.EnvVariableType),
+			Protected:        gitlab.Bool(false),
+			Masked:           gitlab.Bool(false),
+			EnvironmentScope: gitlab.String("*"),
+		})
+		fmt.Println("Group Variable COSIGN_PASSWORD")
+		if err != nil {
+			ui.Warnf(ctx, "If you are using a self-hosted gitlab please set the \"GITLAB_HOST\" your server name.")
+			return fmt.Errorf("could not create \"COSIGN_PASSWORD\" variable: %w", err)
+		}
 	}
 
 	if passwordResp.StatusCode < 200 && passwordResp.StatusCode >= 300 {
@@ -89,8 +101,19 @@ func (g *Gl) PutSecret(ctx context.Context, ref string, pf cosign.PassFunc) erro
 		Protected:    gitlab.Bool(false),
 		Masked:       gitlab.Bool(false),
 	})
+	fmt.Println("Project Variable PRIVATE_KEY")
 	if err != nil {
-		return fmt.Errorf("could not create \"COSIGN_PRIVATE_KEY\" variable: %w", err)
+		_, passwordResp, err = client.GroupVariables.CreateVariable(ref, &gitlab.CreateGroupVariableOptions{
+			Key:          gitlab.String("COSIGN_PRIVATE_KEY"),
+			Value:        gitlab.String(string(keys.PrivateBytes)),
+			VariableType: gitlab.VariableType(gitlab.EnvVariableType),
+			Protected:    gitlab.Bool(false),
+			Masked:       gitlab.Bool(false),
+		})
+		fmt.Println("Group Variable PRIVATE_KEY")
+		if err != nil {
+			return fmt.Errorf("could not create \"COSIGN_PRIVATE_KEY\" variable: %w", err)
+		}
 	}
 
 	if privateKeyResp.StatusCode < 200 && privateKeyResp.StatusCode >= 300 {
@@ -107,8 +130,19 @@ func (g *Gl) PutSecret(ctx context.Context, ref string, pf cosign.PassFunc) erro
 		Protected:    gitlab.Bool(false),
 		Masked:       gitlab.Bool(false),
 	})
+	fmt.Println("Project Variable PUBLIC_KEY")
 	if err != nil {
-		return fmt.Errorf("could not create \"COSIGN_PUBLIC_KEY\" variable: %w", err)
+		_, passwordResp, err = client.GroupVariables.CreateVariable(ref, &gitlab.CreateGroupVariableOptions{
+			Key:          gitlab.String("COSIGN_PUBLIC_KEY"),
+			Value:        gitlab.String(string(keys.PublicBytes)),
+			VariableType: gitlab.VariableType(gitlab.EnvVariableType),
+			Protected:    gitlab.Bool(false),
+			Masked:       gitlab.Bool(false),
+		})
+		fmt.Println("Group Variable PUBLIC_KEY")
+		if err != nil {
+			return fmt.Errorf("could not create \"COSIGN_PUBLIC_KEY\" variable: %w", err)
+		}
 	}
 
 	if publicKeyResp.StatusCode < 200 && publicKeyResp.StatusCode >= 300 {
